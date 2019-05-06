@@ -1,0 +1,63 @@
+---
+- hosts: all
+  become: yes
+  tasks:
+  - name: Update package and install httpd
+    yum:
+      name: httpd
+      update_cache: yes
+      state: present
+    notify:
+    - restart httpd
+    when: ansible_os_family == "RedHat"
+  - name: download webpage
+    get_url: 
+      url: https://raw.githubusercontent.com/GongHub/yamlx/master/info.php
+      dest: /var/www/html/info.php
+    notify: 
+      - restart httpd
+      - restart apache
+  - name:
+    apt:
+      name: apache2
+      state: present
+    notify: 
+    - restart apache
+    when: ansible_os_family == "Debian"
+  - name: install php
+    yum:
+      name: "{{ packages }}"
+    vars:
+      packages:
+        - php
+        - php-mysql
+      state: present
+    notify: 
+    - restart httpd
+    when: ansible_os_family == "RedHat"
+  - name:
+    apt:
+      name: "{{ packages }}"
+    vars:
+      packages:
+        - php
+        - libapache2-mod-php
+        - php-mcrypt
+        - php-mysql
+      state: present
+    notify:   
+    - restart apache
+    when: ansible_os_family == "Debian"
+  handlers:
+  - name: restart httpd
+    service:
+      name: httpd
+      enabled: yes
+      state: restarted
+    when: ansible_os_family == "RedHat"
+  - name: restart apache
+    service:
+      name: apache2
+      enabled: yes
+      state: restarted
+    when: ansible_os_family == "Debian"
