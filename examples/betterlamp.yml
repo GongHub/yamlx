@@ -1,0 +1,28 @@
+---
+- hosts: locaklhost
+  become: yes
+  tasks:
+  - name: install httpd
+    package: 
+      name: "{{ pack_name }}"
+      state: present
+    notify: restart httpd
+    when: ansible_os_family == "RedHat"
+  - name: install php
+    package:
+      name: "{{ php_packages }}"
+      state: present 
+    notify: restart httpd
+    when: ansible_os_family == "RedHat"
+  - name: download webpage
+    get_url:
+      url: https://raw.githubusercontent.com/GongHub/yamlx/master/info.php
+      dest: /var/www/html/info.php
+    notify: restart httpd
+    when: ansible_os_family == "RedHat"
+  handlers:
+  - name: restart httpd
+    service:
+      name: "{{ pack_name }}"
+      state: restarted
+    when: ansible_os_family == "RedHat"
