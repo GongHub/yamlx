@@ -1,5 +1,5 @@
 ---
-- hosts: locaklhost
+- hosts: localhost
   become: yes
   tasks:
   - name: install httpd
